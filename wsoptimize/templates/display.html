@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block nav-display %}<a class="active">Display</a>{% endblock %}
+
+<!-- script to submit form -->
+
+
+
+{% block content %}
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+    $("#ButtonList li").on("click", "a", function(e){
+        e.stopImmediatePropagation();
+        var sname = {'SkillName': $(this).text()}
+        $("#SkillName").val($(this).text())
+        $("#onGraphChange").submit()
+    });
+    
+});
+</script>
+<div class="nav">
+    <ul id="ButtonList">
+		{% for i in display_form.s.field.choices %}
+		<li>
+			<form id="onGraphChange" name="onGraphChange" method="post">
+				<a id="graphselect">{{i.name}}</a>
+	            <input type="hidden" value={{i.name}} name="SkillName" id="SkillName">
+			</form>
+		</li>
+		{% endfor %}
+    <ul>
+</div>
+
+<table id="d_table" class="flat-table">
+	<tr>
+		<th>Skill</th>
+		<th>AP</th>
+		<th>%</th>
+	</tr>
+	{% for i in display_form.s.field.choices %}
+		<tr>
+			<td class="skills">{{i.name}}</td>
+			<td id="ap_col">{{i.ap_o}}</td>
+			<td class="cc_col">{{i.cc_o}}</td>
+		</tr>
+	{% endfor %}
+</table>
+<div><img class="chart_img" alt="embedded" src="data:image/png;base64,{{display_image}}"/></div>
+{% endblock %}

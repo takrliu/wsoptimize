@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block nav-calculate %}<a class="active">Calculate</a>{% endblock %}
+
+{% block content %}
+<!-- script to change 1,0 -->
+<script type="text/javascript">
+    $( function() {
+        $('table#s_table td#onoffanalyze').click( function() {
+            // alert($(this).text())
+            // console.log($(this).closest('td').find('input').val())
+            io = $(this).closest('td').find('input').val() //Number($(this).text())
+            io = Number(io)
+            // alert($(this).closest('tr').find('input[type="hidden"]').val())
+            if (io) {
+                changetext=0;
+                $(this).parent().removeClass('on') 
+                $(this).find('input').removeClass('on')
+                $(this).parent().find("td#srow").find('input').removeClass('on')
+                $(this).parent().addClass('off') 
+                $(this).find('input').addClass('off')
+                $(this).parent().find("td#srow").find('input').addClass('off')
+            }
+            else {
+                changetext=1
+                $(this).parent().removeClass('off')
+                $(this).find('input').removeClass('off')
+                $(this).parent().find("td#srow").find('input').removeClass('off')
+                $(this).parent().addClass('on')
+                $(this).find('input').addClass('on')
+                $(this).parent().find("td#srow").find('input').addClass('on')
+            }
+            $(this).closest('td').find('input').val(changetext.toString())
+        });
+    });
+</script>
+<!-- script to change row colors -->
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("tr.skillrow").each( function() {
+            var io = $(this).find("td#onoffanalyze").find('input').val()
+            console.log(io)
+            io = Number(io)
+            if (io) {
+                $(this).addClass('on')
+                $(this).find("td#onoffanalyze").find('input').addClass('on')
+                $(this).find("td#srow").find('input').addClass('on')
+            }
+            else {
+                $(this).addClass('off')
+                $(this).find("td#onoffanalyze").find('input').addClass('off')
+                $(this).find("td#srow").find('input').addClass('off') 
+            }
+
+        });
+    });
+</script>
+<!-- script to submit form -->
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#ButtonList li").on("click", "#onPowerSelect", function(e){
+            e.stopImmediatePropagation();
+            $("#powerSelectForm").submit()
+        });
+
+        $("#ButtonList li").on("click", "#onCalculate", function(e){
+            e.stopImmediatePropagation();
+            $("#OnCalculateForm").submit()
+
+        });
+
+    });
+    $(document).keypress(function(event){
+     
+        var keycode = (event.keyCode ? event.keyCode : event.which);
+        if(keycode == '13'){
+            $("#onCalculateSubmit").val(1)
+            $("#OnCalculateForm").submit()    
+        }
+     
+    });
+</script>
+<!-- select all script in input box -->
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('input[type=text]').click(function() {
+            $(this).select();
+        })
+
+        $(".percent input").each(function(){
+            $(this).val(parseFloat($(this).val()).toFixed(2)*100 + '%')
+        })
+        $(".general input").each(function(){
+            $(this).val(parseFloat($(this).val()).toFixed(0))
+        })
+    });
+
+</script>
+
+<!-- class selection -->
+<div class="nav">
+    <ul id="ButtonList">
+        <li>
+            <form name="ClassSelectForm" action="" method="post">
+                <div class="styled-select">
+                    <select id="dropdown" data-placeholder="Choose&hellip;" name='ClassSelectType', onChange="ClassSelectForm.submit()">
+                        {% for choice in class_type_form.s.field.choices %}
+                            <option class="{{choice}}" value="{{ choice }}" {% if choice == class_type_form.s.field.initial %}selected="selected"{% endif %}> {{ choice }} </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </li>
+
+        <li>
+            <form id="powerSelectForm" action="" method="post">
+                <a id="onPowerSelect">{{apsp_option}}</a>
+                <input type="hidden" value={{apsp_option}} name="apspSelect" id="PowerSelectOption">
+            </form>
+        </li>
+
+        <li>
+            <a id="onCalculate">Calculate</a>
+        </li>
+
+    <ul>
+</div>
+<!-- character info input -->
+<form action="" method="post", id="OnCalculateForm">
+    <table class="flat-table">
+        <tr>
+            <th></th>
+            <th>Power</th>
+            <th>Critical Chance</th>
+            <th>Critical Severity</th>
+            <th>Rune Slots</th>
+        </tr>
+        {% for i in character_form.s.field.choices %}
+    	<tr>
+            <td>Pre</td>
+            <td><input type="text" name=pwr value={{i.pwr}}> </td>
+            <td><input type="text" name=chc value={{i.chc}}> </td>
+            <td><input type="text" name=chs value={{i.chs}}> </td>
+            <td><input type="text" name=pts value={{i.pts}}> </td>
+        </tr>
+        <tr>
+            <td>Buff</td>
+            <td class="general"><input type="text" value={{i.modified_pwr}} readonly></td>
+            <td class="percent"><input type="text" value={{i.modified_chc}} readonly></td>
+            <td class="percent"><input type="text" value={{i.modified_chs}} readonly></td>
+            <td class="percent"><input type="text" value={{i.mdmg}} readonly></td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <table id="s_table" class="flat-table">
+        <tr>
+            <th width=25>Skill</th>
+            <th width=25>Weight</th>
+            <th width=25>Tier</th>
+            <th width=25>Analyze</th>
+        </tr>
+        {% for i in skill_form.s.field.choices %}
+        <tr class="skillrow">
+            <td class="skills" width=25>{{i.n}}</td>
+            <td id="srow" width=25><input type="text" name=w value={{i.w}}></td>
+            <td id="srow" width=25><input type="text" name=t value={{i.t}}></td>
+            <td id="onoffanalyze" class=button><input class="button" type="text" name=a value={{i.a}} readonly></td>
+        </tr>
+        {% endfor %}
+        <input id="onCalculateSubmit" type="hidden" name="OnCalculate" value="0">
+    </table>
+    
+</form>
+{% endblock %}

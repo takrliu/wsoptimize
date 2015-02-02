@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block nav-buffs %}<a class="active">Buffs</a>{% endblock %}
+
+{% block content %}
+<!-- script to change 1,0 -->
+<script type="text/javascript">
+    $( function() {
+        $('table#s_table td#onoffanalyze').click( function() {
+            // alert($(this).text())
+            // console.log($(this).closest('td').find('input').val())
+            io = $(this).closest('td').find('input').val() //Number($(this).text())
+            io = Number(io)
+            // alert($(this).closest('tr').find('input[type="hidden"]').val())
+            if (io) {
+                changetext=0;
+                $(this).parent().removeClass('on') 
+                $(this).find('input').removeClass('on')
+                $(this).parent().find("td#srow").find('input').removeClass('on')
+                $(this).parent().addClass('off') 
+                $(this).find('input').addClass('off')
+                $(this).parent().find("td#srow").find('input').addClass('off')
+            }
+            else {
+                changetext=1
+                $(this).parent().removeClass('off')
+                $(this).find('input').removeClass('off')
+                $(this).parent().find("td#srow").find('input').removeClass('off')
+                $(this).parent().addClass('on')
+                $(this).find('input').addClass('on')
+                $(this).parent().find("td#srow").find('input').addClass('on')
+            }
+            $(this).closest('td').find('input').val(changetext.toString())
+        });
+    });
+</script>
+<!-- script to change row colors -->
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("tr.skillrow").each( function() {
+            var io = $(this).find("td#onoffanalyze").find('input').val()
+            console.log(io)
+            io = Number(io)
+            if (io) {
+                $(this).addClass('on')
+                $(this).find("td#onoffanalyze").find('input').addClass('on')
+                $(this).find("td#srow").find('input').addClass('on')
+            }
+            else {
+                $(this).addClass('off')
+                $(this).find("td#onoffanalyze").find('input').addClass('off')
+                $(this).find("td#srow").find('input').addClass('off') 
+            }
+
+        });
+    });
+</script>
+<!-- script to submit form -->
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#ButtonList li").on("click", "#onPowerSelect", function(e){
+            e.stopImmediatePropagation();
+            $("#powerSelectForm").submit()
+        });
+
+        $("#ButtonList li").on("click", "#onSave", function(e){
+            e.stopImmediatePropagation();
+            $("#onBuffsSave").submit()
+        });
+    });
+
+</script>
+<!-- select all script in input box -->
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('input[type=text]').click(function() {
+            $(this).select();
+        })
+
+        $(".percent").each(function(){
+            $(this).text(parseFloat($(this).text()).toFixed(2)*100 + '%')
+        })
+    });
+
+
+</script>
+
+<!-- class selection -->
+<div class="nav">
+    <ul id="ButtonList">
+        <li>
+            <form name="ClassSelectForm" action="" method="post">
+                <div class="styled-select">
+                    <select id="dropdown" data-placeholder="Choose&hellip;" name='ClassSelectType', onChange="ClassSelectForm.submit()">
+                        {% for choice in class_type_form.s.field.choices %}
+                            <option class="{{choice}}" value="{{ choice }}" {% if choice == class_type_form.s.field.initial %}selected="selected"{% endif %}> {{ choice }} </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </li>
+
+        <li>
+            <form id="powerSelectForm" action="" method="post">
+                <a id="onPowerSelect">{{apsp_option}}</a>
+                <input type="hidden" value={{apsp_option}} name="apspSelect" id="PowerSelectOption">
+            </form>
+        </li>
+
+        <li>
+            <a id="onSave">Save</a>
+        </li>
+
+    <ul>
+</div>
+
+<!-- buffs info input -->
+<form action="" method="post", id="onBuffsSave">
+
+    <table id="s_table" class="flat-table">
+        <tr>
+            <th></th>
+            <th>PWR</th>
+            <th>CHR</th>
+            <th>CHS</th>
+            <th>DMG</th>
+        </tr>
+        <tr>
+            {% for i in character_form.s.field.choices %}
+            <td class="skills">Overall</td>
+            <td class="percent">{{i.mpwr}}</td>
+            <td class="percent">{{i.mchc}}</td>
+            <td class="percent">{{i.mchs}}</td>
+            <td class="percent">{{i.mdmg}}</td>
+            {% endfor %}
+        </tr>
+    </table>
+
+    <table id="s_table" class="flat-table">
+        <tr>
+            <th>Name</th>
+            <th>Target</th>
+            <th>Effect</th>
+            <th>Type</th>
+            <th>Uptime</th>
+            <th>Modifier</th>
+            <th>Include</th>
+        </tr>
+        {% for i in buffs_form.s.field.choices %}
+        <tr class="skillrow">
+            <td class="skills">{{i.n}}</td>
+            <td>{{i.t}}</td>
+            <td><input type="text" name=Effect value={{i.e}}></td>
+            <td>{{i.mt}}</td>
+            <td><input type="text" name=Uptime value={{i.u}}></td>
+            <td class='percent'>{{i.m}}</td>
+            <td id="onoffanalyze" class=button><input class="button" type="text" name=Analyze value={{i.a}} readonly></td>
+        </tr>
+        {% endfor %}
+        <input type="hidden" name="onBuffsSave" value="1">
+    </table>
+    
+</form>
+{% endblock %}
